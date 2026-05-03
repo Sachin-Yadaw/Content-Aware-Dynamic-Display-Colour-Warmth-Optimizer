@@ -9,10 +9,6 @@
 
 using namespace std;
 
-// =========================================================
-// UNIT II: GAUSSIAN ELIMINATION MODULE
-// =========================================================
-// Calculates the exact RGB coefficients for a target tint
 vector<double> gaussianSolver(vector<vector<double>> A, vector<double> B) {
     int n = 3;
     for (int i = 0; i < n; i++) {
@@ -35,32 +31,25 @@ vector<double> gaussianSolver(vector<vector<double>> A, vector<double> B) {
     return x; 
 }
 
-// =========================================================
-// UNIT I: SECANT METHOD MODULE
-// =========================================================
-// Finds the "Root" (the optimal reduction) where contrast is safe
 double secantOptimizer(double energy) {
     auto f = [&](double x) { 
-        // Readability Model: Contrast drops as reduction (x) increases
         double currentContrast = 10.0 * (1.0 - (x * 0.7)); 
-        return currentContrast - 4.5; // We want Root where Contrast = 4.5
+        return currentContrast - 4.5; 
     };
     
-    double x0 = 0.1, x1 = 0.2; // Initial guesses
+    double x0 = 0.1, x1 = 0.2; 
     for (int i = 0; i < 5; i++) {
         double f0 = f(x0), f1 = f(x1);
         if (abs(f1 - f0) < 0.0001) break;
         double x_next = x1 - f1 * (x1 - x0) / (f1 - f0);
         x0 = x1; x1 = x_next;
     }
-    // High energy (white screen) allows more reduction; low energy requires less
+   
     double maxPossible = (energy / 255.0); 
     return max(0.0, min(maxPossible, x1));
 }
 
-// =========================================================
-// UNIT III: CUBIC SPLINE MODULE
-// =========================================================
+
 class SplineSmoother {
     double start, end, t;
 public:
@@ -75,9 +64,6 @@ public:
     bool isTransitioning() { return t < 1.0; }
 };
 
-// =========================================================
-// UNIT IV: SIMPSON'S RULE (SIMPLIFIED INTEGRATION)
-// =========================================================
 double getScreenEnergy() {
     HDC hdc = GetDC(NULL);
     int w = GetSystemMetrics(SM_CXSCREEN), h = GetSystemMetrics(SM_CYSCREEN);
@@ -114,10 +100,7 @@ int main() {
         double energy = getScreenEnergy();
         double optReduction = secantOptimizer(energy);
 
-        // Define Linear System for Unit II target (Amber Tint)
-        // 1R + 0G + 0B = 1.0
-        // 0R + 1G + 0B = (1.0 - 0.2*reduction)
-        // 0R + 0G + 1B = (1.0 - reduction)
+
         vector<vector<double>> A = {{1,0,0},{0,1,0},{0,0,1}};
         vector<double> B = {1.0, 1.0 - (optReduction * 0.2), 1.0 - optReduction};
         
